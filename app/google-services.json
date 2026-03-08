@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "491106857709",
+    "project_id": "prazo-certo-76a63",
+    "storage_bucket": "prazo-certo-76a63.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:491106857709:android:f3c420e104c4cc480692e4",
+        "android_client_info": {
+          "package_name": "br.com.fiap.prazocerto"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDrs7E4uT3RrDEegmihFbSXCLReR-pJ20k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
