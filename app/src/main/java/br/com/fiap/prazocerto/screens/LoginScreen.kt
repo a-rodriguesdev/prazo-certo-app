@@ -1,5 +1,6 @@
 package br.com.fiap.prazocerto.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -7,8 +8,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -20,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -31,6 +35,7 @@ import br.com.fiap.prazocerto.R
 import br.com.fiap.prazocerto.ui.theme.PrazoCertoTheme
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun LoginScreen(
@@ -43,6 +48,21 @@ fun LoginScreen(
     }
     var password by remember {
         mutableStateOf("")
+    }
+
+    // Obter uma instância do Firebase
+    val autentica = FirebaseAuth.getInstance()
+
+    // Obter o contexto para exibir um toas
+    val context = LocalContext.current
+
+    // Criar uma variável de estado para
+    // controlar a exibição de um indicador de progresso
+    var estaCarregando by remember { mutableStateOf(false) }
+
+    // Verificar se os dados de autenticação estão presentes
+    if (autentica.currentUser != null) {
+        navController.navigate("home")
     }
 
     Column(
@@ -97,9 +117,32 @@ fun LoginScreen(
         )
         Spacer(modifier = modifier.height(16.dp))
         Button(
-            onClick = {}
+            onClick = {
+                if (email.isNotEmpty() && password.isNotEmpty()) {
+                    autentica.signInWithEmailAndPassword(email, password)
+                        .addOnCompleteListener { tarefa ->
+                            estaCarregando = false
+                            if (tarefa.isSuccessful) {
+                                navController.navigate("home")
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    "Autenticação falhou",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+                }
+            }
         ) {
-            Text(text = "Entrar")
+            if (estaCarregando){
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            } else {
+                Text(text = "Entrar")
+            }
         }
         Spacer(modifier = modifier.height(8.dp))
         TextButton(
