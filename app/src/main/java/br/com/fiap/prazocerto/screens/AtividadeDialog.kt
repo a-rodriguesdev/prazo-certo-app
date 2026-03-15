@@ -19,6 +19,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import br.com.fiap.prazocerto.model.Atividade
+import com.google.firebase.Firebase
+import com.google.firebase.database.database
 
 @Composable
 fun AtividadeDialog(
@@ -88,13 +90,39 @@ fun AtividadeDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    val novaAtividade = Atividade(
-                        titulo = titulo,
-                        disciplina = disciplina,
-                        dataEntrega = dataEntrega,
-                        foiEntregue = foiEntregue
-                    )
-                    onConfirm()
+                    // Criamos uma instância do Firebase Realtime Database
+                    val database = Firebase
+                        .database("https://prazo-certo-76a63-default-rtdb.firebaseio.com/")
+
+                    if (operacao == "Adicionar") {
+                        val novaAtividade = Atividade(
+                            titulo = titulo,
+                            disciplina = disciplina,
+                            dataEntrega = dataEntrega,
+                            foiEntregue = foiEntregue
+                        )
+                        // Obter a nova chave gerada pelo Firebase
+                        val novaReferencia = database.getReference("atividades").push()
+
+                        // Atualizar o ID da atividade com a nova chave
+                        novaAtividade.id = novaReferencia.key.toString()
+
+                        // Salvamos a nova atividade no Firebase
+                        novaReferencia.setValue(novaAtividade.toJson())
+
+                        onConfirm()
+                    } else {
+                        val novaAtividade  = atividade.copy(
+                            titulo = titulo,
+                            disciplina = disciplina,
+                            dataEntrega = dataEntrega,
+                            foiEntregue = foiEntregue
+                        )
+                        database.getReference("atividades")
+                            .child(atividade.id)
+                            .setValue(novaAtividade.toJson())
+                        onConfirm()
+                    }
                 }
             ) {
                 Text(text = "Confirmar")

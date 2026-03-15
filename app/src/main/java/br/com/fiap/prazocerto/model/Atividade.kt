@@ -1,7 +1,7 @@
 package br.com.fiap.prazocerto.model
 
 data class Atividade(
-    val id: String = "",
+    var id: String = "",
     val titulo: String = "",
     val disciplina: String = "",
     val dataEntrega: String = "",
