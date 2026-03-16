@@ -36,14 +36,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import br.com.fiap.prazocerto.R
 import br.com.fiap.prazocerto.model.Atividade
 import br.com.fiap.prazocerto.ui.theme.PrazoCertoTheme
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.database
@@ -54,6 +59,18 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     navController: NavHostController
 ) {
+    // Obter uma instância do Firebase
+    val usuarioLogado = FirebaseAuth.getInstance()
+
+    // Necessário para efetuar o deslogar da conta do Google
+    val context = LocalContext.current
+    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        .requestIdToken(context.getString(R.string.default_web_client_id))
+        .requestEmail()
+        .build()
+
+    val googleSignInClient = GoogleSignIn.getClient(context, gso)
+
     // Controla a exibição da caixa de diálogo AtividadeDialog
     var mostrarDialog by remember {
         mutableStateOf(false)
@@ -109,15 +126,26 @@ fun HomeScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        Column(){
                         Text(
                             text = "Prazo Certo",
                             color = MaterialTheme.colorScheme.onPrimary
                         )
+                            Text(
+                                text = usuarioLogado.currentUser!!.displayName!!,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                                fontSize = 14.sp
+                            )
+                    }
                         IconButton(
                             onClick = {
                                 val autentica = FirebaseAuth.getInstance()
                                 autentica.signOut()
-                                navController.navigate("login")
+                                // Deslogar do Google
+                                googleSignInClient.signOut()
+                                    .addOnCompleteListener {
+                                        navController.navigate("login")
+                                    }
                             }
                         ) {
                             Icon(
